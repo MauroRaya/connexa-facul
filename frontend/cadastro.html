@@ -1,0 +1,244 @@
+<!--
+TASK-005: Cadastro de Usuário
+Este arquivo implementa o frontend para o endpoint de cadastro de usuários.
+-->
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastro de Usuário</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* TASK-005: Estilos do formulário de cadastro */
+        body {
+            background: #f6fafd;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            color: #2D5E78;
+        }
+        .container {
+            max-width: 400px;
+            margin: 40px auto;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(45,94,120,0.08);
+            padding: 32px 24px;
+        }
+        h1 {
+            text-align: center;
+            color: #2D5E78;
+            margin-bottom: 24px;
+        }
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+        }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 16px;
+            border: 1px solid #b3c6d6;
+            border-radius: 4px;
+            font-size: 1rem;
+            box-sizing: border-box;
+        }
+        input:focus, select:focus {
+            border-color: #2D5E78;
+            outline: none;
+        }
+        .feedback {
+            font-size: 0.95rem;
+            margin-bottom: 12px;
+            color: #d32f2f;
+        }
+        .success {
+            color: #388e3c;
+        }
+        .loading {
+            color: #2D5E78;
+            font-size: 1rem;
+            margin-bottom: 12px;
+        }
+        button {
+            width: 100%;
+            background: #2D5E78;
+            color: #fff;
+            border: none;
+            padding: 12px;
+            border-radius: 4px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        button:disabled {
+            background: #b3c6d6;
+            cursor: not-allowed;
+        }
+        @media (max-width: 500px) {
+            .container {
+                padding: 16px 8px;
+            }
+        }
+        .password-hint {
+            font-size: 0.9rem;
+            color: #2D5E78;
+            margin-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container" role="main">
+        <h1>Cadastro de Usuário</h1>
+        <form id="cadastroForm" aria-label="Formulário de cadastro de usuário" autocomplete="off" novalidate>
+            <label for="nomeCompleto">Nome Completo *</label>
+            <input type="text" id="nomeCompleto" name="nomeCompleto" required aria-required="true" autocomplete="name">
+            <div id="nomeFeedback" class="feedback" aria-live="polite"></div>
+
+            <label for="email">Email Institucional *</label>
+            <input type="email" id="email" name="email" required aria-required="true" autocomplete="email" placeholder="usuario@universidade.edu.br">
+            <div id="emailFeedback" class="feedback" aria-live="polite"></div>
+
+            <label for="curso">Curso</label>
+            <input type="text" id="curso" name="curso" autocomplete="organization">
+
+            <label for="semestre">Semestre</label>
+            <select id="semestre" name="semestre">
+                <option value="">Selecione</option>
+                <option value="1">1º</option>
+                <option value="2">2º</option>
+                <option value="3">3º</option>
+                <option value="4">4º</option>
+                <option value="5">5º</option>
+                <option value="6">6º</option>
+                <option value="7">7º</option>
+                <option value="8">8º</option>
+            </select>
+
+            <label for="senha">Senha *</label>
+            <input type="password" id="senha" name="senha" required aria-required="true" autocomplete="new-password" minlength="8">
+            <div class="password-hint">A senha deve ter no mínimo 8 caracteres, incluindo letra maiúscula, minúscula e número.</div>
+            <div id="senhaFeedback" class="feedback" aria-live="polite"></div>
+
+            <button type="submit" id="submitBtn">Cadastrar</button>
+            <div id="formFeedback" class="feedback" aria-live="polite"></div>
+            <div id="loading" class="loading" style="display:none;">Enviando...</div>
+        </form>
+    </div>
+    <script>
+    // TASK-005: JS para validação e envio do formulário
+    const form = document.getElementById('cadastroForm');
+    const nomeInput = document.getElementById('nomeCompleto');
+    const emailInput = document.getElementById('email');
+    const senhaInput = document.getElementById('senha');
+    const submitBtn = document.getElementById('submitBtn');
+    const nomeFeedback = document.getElementById('nomeFeedback');
+    const emailFeedback = document.getElementById('emailFeedback');
+    const senhaFeedback = document.getElementById('senhaFeedback');
+    const formFeedback = document.getElementById('formFeedback');
+    const loading = document.getElementById('loading');
+
+    // Validação em tempo real
+    nomeInput.addEventListener('input', () => {
+        if (!nomeInput.value.trim()) {
+            nomeFeedback.textContent = 'Nome completo é obrigatório.';
+        } else {
+            nomeFeedback.textContent = '';
+        }
+    });
+
+    emailInput.addEventListener('input', () => {
+        const email = emailInput.value.trim();
+        if (!email) {
+            emailFeedback.textContent = 'Email é obrigatório.';
+        } else if (!email.endsWith('@universidade.edu.br')) {
+            emailFeedback.textContent = 'Use o email institucional (@universidade.edu.br).';
+        } else {
+            emailFeedback.textContent = '';
+        }
+    });
+
+    senhaInput.addEventListener('input', () => {
+        const senha = senhaInput.value;
+        const regexSenha = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+        if (!senha) {
+            senhaFeedback.textContent = 'Senha é obrigatória.';
+        } else if (!regexSenha.test(senha)) {
+            senhaFeedback.textContent = 'Senha inválida. Deve ter 8+ caracteres, maiúscula, minúscula e número.';
+        } else {
+            senhaFeedback.textContent = '';
+        }
+    });
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        formFeedback.textContent = '';
+        submitBtn.disabled = true;
+        loading.style.display = 'block';
+
+        // Validação final
+        let valid = true;
+        if (!nomeInput.value.trim()) {
+            nomeFeedback.textContent = 'Nome completo é obrigatório.';
+            valid = false;
+        }
+        if (!emailInput.value.trim()) {
+            emailFeedback.textContent = 'Email é obrigatório.';
+            valid = false;
+        } else if (!emailInput.value.endsWith('@universidade.edu.br')) {
+            emailFeedback.textContent = 'Use o email institucional (@universidade.edu.br).';
+            valid = false;
+        }
+        const senha = senhaInput.value;
+        const regexSenha = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+        if (!senha) {
+            senhaFeedback.textContent = 'Senha é obrigatória.';
+            valid = false;
+        } else if (!regexSenha.test(senha)) {
+            senhaFeedback.textContent = 'Senha inválida. Deve ter 8+ caracteres, maiúscula, minúscula e número.';
+            valid = false;
+        }
+        if (!valid) {
+            submitBtn.disabled = false;
+            loading.style.display = 'none';
+            return;
+        }
+
+        // Monta payload
+        const payload = {
+            nomeCompleto: nomeInput.value.trim(),
+            email: emailInput.value.trim(),
+            curso: document.getElementById('curso').value.trim(),
+            semestre: document.getElementById('semestre').value,
+            senha: senhaInput.value
+        };
+
+        try {
+            // Ajuste a URL conforme o backend (localhost:3000/usuarios/cadastro)
+            const response = await fetch('http://localhost:3000/usuarios/cadastro', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            });
+            const data = await response.json();
+            if (response.ok) {
+                formFeedback.textContent = data.mensagem || 'Cadastro realizado com sucesso!';
+                formFeedback.classList.add('success');
+                form.reset();
+            } else {
+                formFeedback.textContent = data.erro || 'Erro ao cadastrar.';
+                formFeedback.classList.remove('success');
+            }
+        } catch (err) {
+            formFeedback.textContent = 'Erro de conexão com o servidor.';
+            formFeedback.classList.remove('success');
+        }
+        submitBtn.disabled = false;
+        loading.style.display = 'none';
+    });
+    </script>
+</body>
+</html>
